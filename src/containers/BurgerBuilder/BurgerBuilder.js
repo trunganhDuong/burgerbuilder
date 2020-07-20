@@ -4,6 +4,9 @@ import BuildControls from '../../components/BuildControls/BuildControls';
 import ModifyIngredientContext from '../../contexts/ModifyIngredientContext';
 import Modal from '../../components/UI/Modal/Modal';
 import OrderSummary from '../../components/OrderSummary/OrderSummary';
+import firebase from '../../axios';
+import withLoader from '../../components/HOCs/Loader/Loader';
+import withNotification from '../../components/HOCs/Notification/Notification';
 
 const INGREDIENT_PRICE = {
     salad: 0.5,
@@ -62,7 +65,26 @@ class BurgerBuilder extends React.Component {
     }
 
     onPurchasingContinue = () => {
-        alert("You haved purchased");
+        this.setState({
+            purchasing: false
+        });
+        firebase
+            .post("/orders.json", {
+                ingredients: this.state.ingredients,
+                price: this.state.totalPrice,
+                customer: {
+                    address: {
+                        country: "VN",
+                        street: "Do Duc Duc"
+                    },
+                    email: 'anhdt@gmail.com',
+                    name: 'Trung Anh'
+                },
+                deliveryMethod: 'COD'
+            })
+            .then(res => {
+                console.log("You have purchased successfully");
+            })
     }
 
     render() {
@@ -96,4 +118,4 @@ class BurgerBuilder extends React.Component {
     }
 }
 
-export default BurgerBuilder;
+export default withNotification(withLoader(BurgerBuilder, firebase), firebase, "Order placed successfully");
